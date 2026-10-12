@@ -1,0 +1,284 @@
+{
+  "info": {
+    "name": "Catálogo de Jogos - API REST",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1 - Cadastrar jogo",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/jogos",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Stardew Valley\",\n  \"genero\": \"Simulação\",\n  \"plataforma\": \"PC\",\n  \"concluido\": false\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"201 e ID gerado\", function () { pm.response.to.have.status(201); pm.expect(pm.response.json().id).to.be.a(\"number\"); });",
+              "pm.collectionVariables.set(\"jogoId\", pm.response.json().id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 - Listar todos",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/jogos"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 e jogo cadastrado\", function () { pm.response.to.have.status(200); pm.expect(pm.response.json().some(j => j.id === Number(pm.collectionVariables.get(\"jogoId\")))).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 - Buscar pelo ID",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/jogos/{{jogoId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 e ID correto\", function () { pm.response.to.have.status(200); pm.expect(pm.response.json().id).to.equal(Number(pm.collectionVariables.get(\"jogoId\"))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 - Conferir após reiniciar a API",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/jogos/{{jogoId}}",
+        "description": "Pare e inicie a API no IntelliJ antes de enviar. Não execute o cadastro novamente. O mesmo ID deve continuar disponível. Confira também no pgAdmin antes de excluir."
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 e ID correto\", function () { pm.response.to.have.status(200); pm.expect(pm.response.json().id).to.equal(Number(pm.collectionVariables.get(\"jogoId\"))); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 - Filtrar por nome",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/jogos?nome=Stardew%20Valley"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 e nome correspondente\", function () { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.have.length.above(0); pm.expect(pm.response.json().every(j => j.nome === \"Stardew Valley\")).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 - Filtrar por gênero",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/jogos?genero=Simula%C3%A7%C3%A3o"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 e gênero correspondente\", function () { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.have.length.above(0); pm.expect(pm.response.json().every(j => j.genero === \"Simulação\")).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7 - Filtrar por plataforma",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/jogos?plataforma=PC"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 e plataforma correspondente\", function () { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.have.length.above(0); pm.expect(pm.response.json().every(j => j.plataforma === \"PC\")).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8 - Filtrar por concluído",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/jogos?concluido=false"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 e jogos não concluídos\", function () { pm.response.to.have.status(200); pm.expect(pm.response.json()).to.have.length.above(0); pm.expect(pm.response.json().every(j => j.concluido === false)).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9 - Combinar três filtros",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/jogos?genero=Simula%C3%A7%C3%A3o&plataforma=PC&concluido=false"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 e jogo encontrado com os três filtros\", function () { pm.response.to.have.status(200); pm.expect(pm.response.json().some(j => j.id === Number(pm.collectionVariables.get(\"jogoId\")))).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "10 - Atualizar jogo",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/jogos/{{jogoId}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"nome\": \"Stardew Valley\",\n  \"genero\": \"Simulação\",\n  \"plataforma\": \"PC\",\n  \"concluido\": true\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 e concluído atualizado\", function () { pm.response.to.have.status(200); pm.expect(pm.response.json().concluido).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "11 - Conferir filtro após atualização",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/jogos?plataforma=PC&concluido=true"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"200 e jogo atualizado aparece no filtro\", function () { pm.response.to.have.status(200); pm.expect(pm.response.json().some(j => j.id === Number(pm.collectionVariables.get(\"jogoId\")))).to.be.true; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "12 - Excluir jogo",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/jogos/{{jogoId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"204 e corpo vazio\", function () { pm.response.to.have.status(204); pm.expect(pm.response.text()).to.equal(\"\"); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "13 - Buscar jogo excluído",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/jogos/{{jogoId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"404 após exclusão\", function () { pm.response.to.have.status(404); });"
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "jogoId",
+      "value": ""
+    }
+  ]
+}
